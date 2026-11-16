@@ -1,0 +1,37 @@
+[asr.openthai]
+kind = "nemo_streaming"
+repo = "iapp/OpenThai2.0-ASR-Streaming"
+filename = "openthai2.0-asr-streaming_bias-1.0.nemo"
+revision = "c28df2a70bb16376ed7dc6a5233cffb41bb54a68"
+language = "th-TH"
+latency_ms = 1120
+max_symbols_per_step = 2
+
+[asr.typhoon]
+kind = "nemo_streaming"
+repo = "typhoon-ai/typhoon-asr-streaming-nemotron-0.6b"
+filename = "typhoon-asr-streaming-nemotron-0.6b.nemo"
+revision = "a512acdc0136606078c11a27007108b34f808580"
+language = "th-TH"
+latency_ms = 1120
+max_symbols_per_step = 2
+
+[diarization]
+kind = "nemo_sortformer"
+repo = "nvidia/Nemotron-3-Diarization"
+filename = "Nemotron-3-Diarization.nemo"
+revision = "52a432672732425e4c19765b9fec9b5810e6f4ba"
+# Publisher's offline speaker-detection settings (30.4 s context latency).
+chunk_len = 340
+chunk_right_context = 40
+fifo_len = 40
+spkcache_update_period = 300
+spkcache_len = 264
+
+[asr.qwen]
+kind = "qwen_asr"
+repo = "Qwen/Qwen3-ASR-0.6B"
+revision = "5eb144179a02acc5e5ba31e748d22b0cf3e303b0"
+language = "Thai"
+max_new_tokens = 2048
+max_segment_s = 25
