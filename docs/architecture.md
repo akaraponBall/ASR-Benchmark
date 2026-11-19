@@ -1,6 +1,7 @@
 # Architecture and extension guide
 
-The inference path is ordinary Python. FFmpeg is the only external executable.
+The benchmark runs in Python and uses FFmpeg for audio conversion. The LFM3 profile
+delegates ASR inference to a separate Llama.app process over loopback.
 
 ```text
 JSONL manifest -> validate -> convert to mono 16 kHz
@@ -31,8 +32,9 @@ The OpenThai and Typhoon ASR profiles use the same cache-aware NeMo streaming im
 `models.toml`. Shared model code contains no hardcoded model names. The NeMo ASR decoder cache
 and hypothesis are recreated per recording. The models are loaded once per model alias
 and reused across clips. Both ASR and diarization remain loaded for the complete pipeline.
-Every invocation uses a fixed full Hugging Face revision. `--offline` refuses network fetches;
-use `fetch` first when a checkpoint is missing. No copy is made to a second torch cache.
+Benchmark-managed checkpoints use a fixed full Hugging Face revision. `--offline` refuses
+network fetches; use `fetch` first when a checkpoint is missing. No copy is made to a second
+torch cache. See [LFM3](lfm3.md) for the server-managed checkpoint and turn timestamps.
 
 ## Attribution limits
 

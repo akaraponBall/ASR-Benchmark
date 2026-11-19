@@ -65,8 +65,11 @@ from clips used to tune settings.
 
 ## Comparing Qwen
 
-Qwen processes diarized turns instead of a whole-file streaming transcript. Its reported
-`timestamp_method` is `diarization_turn`; other profiles use `token_emission`. CER/WER
+Qwen and LFM3 process diarized turns and report `timestamp_method` as `diarization_turn`.
+The NeMo streaming profiles report `token_emission`. CER/WER
 include any omissions from missed speech intervals and any duplicated overlap text. DER
 still scores the shared speaker detector, not the text assigned to each speaker. See
 [Qwen limitations](qwen.md). Qwen does not use the NeMo latency setting.
+
+For [LFM3](lfm3.md), ASR wall time includes local server requests. Benchmark RSS and CUDA
+allocation exclude the separate Llama.app process.

@@ -7,7 +7,7 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from .schema import ASRConfig, Settings
+from .schema import ASRConfig, LlamaASRConfig, Settings
 
 app = typer.Typer(no_args_is_help=True, pretty_exceptions_enable=False)
 console = Console()
@@ -18,7 +18,12 @@ def models(config: Path = Path("models.toml")):
     """List configured ASR models. Every pipeline includes speaker detection."""
     settings = Settings.load(config)
     for name, model in settings.asr.items():
-        mode = f"{model.latency_ms} ms" if isinstance(model, ASRConfig) else "diarized turns, offline ASR"
+        if isinstance(model, LlamaASRConfig):
+            mode = f"diarized turns, Llama.app on localhost:{model.port}"
+        elif isinstance(model, ASRConfig):
+            mode = f"{model.latency_ms} ms"
+        else:
+            mode = "diarized turns, offline ASR"
         console.print(f"{name}: {model.repo} ({mode})")
     console.print(f"Speaker detector: {settings.diarization.repo}")
 
@@ -33,7 +38,11 @@ def fetch(model: Annotated[list[str], typer.Option("--model", "-m")], config: Pa
         if name not in settings.asr:
             raise typer.BadParameter(f"unknown model {name!r}")
     for name in model:
-        console.print(resolve_checkpoint(settings.asr[name], offline=False))
+        profile = settings.asr[name]
+        if isinstance(profile, LlamaASRConfig):
+            console.print(f"{name}: managed by Llama.app on localhost:{profile.port}")
+        else:
+            console.print(resolve_checkpoint(profile, offline=False))
     console.print(resolve_checkpoint(settings.diarization, offline=False))
 
 

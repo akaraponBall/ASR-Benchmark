@@ -3,7 +3,17 @@
 from pathlib import Path
 from typing import Protocol
 
-from .schema import ASRConfig, Checkpoint, DiarizationConfig, QwenASRConfig, Segment, Token, Transcript
+from .schema import (
+    ASRConfig,
+    ASRSettings,
+    Checkpoint,
+    DiarizationConfig,
+    LlamaASRConfig,
+    QwenASRConfig,
+    Segment,
+    Token,
+    Transcript,
+)
 
 
 class ASRAdapter(Protocol):
@@ -165,7 +175,13 @@ def resolve_checkpoint(config: Checkpoint | QwenASRConfig, offline: bool) -> str
     return hf_hub_download(config.repo, config.filename, revision=config.revision, local_files_only=offline)
 
 
-def create_asr(config: ASRConfig | QwenASRConfig, path: str, device: str) -> ASRAdapter:
+def create_asr(config: ASRSettings, path: str | None, device: str) -> ASRAdapter:
+    if isinstance(config, LlamaASRConfig):
+        from .llama_asr import LlamaASR
+
+        return LlamaASR(config)
+    if path is None:
+        raise ValueError(f"checkpoint required for {config.kind}")
     if isinstance(config, QwenASRConfig):
         return QwenASR(config, path, device)
     if config.kind == "nemo_streaming":

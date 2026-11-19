@@ -35,3 +35,9 @@ revision = "5eb144179a02acc5e5ba31e748d22b0cf3e303b0"
 language = "Thai"
 max_new_tokens = 2048
 max_segment_s = 25
+
+[asr.lfm3]
+kind = "llama_audio"
+repo = "LiquidAI/LFM3-Omni-2B"
+port = 9931
+language = "Thai"

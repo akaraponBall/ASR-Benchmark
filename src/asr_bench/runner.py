@@ -13,10 +13,11 @@ from pathlib import Path
 from .adapters import create_asr, create_diarizer, resolve_checkpoint
 from .alignment import SpeakerAttributor
 from .audio import file_hash, prepare_audio
+from .llama_asr import LlamaASR
 from .measurement import Measurement
 from .metrics import NORMALIZATION, diarization_scores, text_scores
 from .reporting import render_transcript
-from .schema import Settings, load_manifest, validate_timeline
+from .schema import LlamaASRConfig, Settings, load_manifest, validate_timeline
 
 
 def run_benchmark(
@@ -80,17 +81,22 @@ def run_benchmark(
     rows = []
     try:
         for name in names:
+            config = settings.asr[name]
+            served = isinstance(config, LlamaASRConfig)
             print(f"Loading {name} + speaker detector...", flush=True)
             download_start = time.perf_counter()
-            asr_path = resolve_checkpoint(settings.asr[name], offline)
+            asr_path = None if served else resolve_checkpoint(config, offline)
             diar_path = resolve_checkpoint(settings.diarization, offline)
             download_s = time.perf_counter() - download_start
             load_start = time.perf_counter()
-            asr = create_asr(settings.asr[name], asr_path, device)
+            asr = create_asr(config, asr_path, device)
             diarizer = create_diarizer(settings.diarization, diar_path, device)
             if device == "cuda":
                 torch.cuda.synchronize()
             load_s = time.perf_counter() - load_start
+            if isinstance(asr, LlamaASR):
+                metadata.setdefault("served_model_ids", {})[name] = asr.model_id
+                _write_json(output / "run.json", metadata)
             for sample in samples:
                 with tempfile.TemporaryDirectory(prefix="asr-bench-") as directory:
                     audio = Path(directory) / "audio.wav"

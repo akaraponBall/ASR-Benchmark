@@ -1,9 +1,9 @@
 # ASR Bench
 
 A local Python project for comparing speech recognition **with mandatory speaker detection**.
-Compare OpenThai, Typhoon ASR, and Qwen3-ASR-0.6B, all paired with NVIDIA Nemotron-3-Diarization.
-Audio and transcripts stay on your machine. Hugging Face supplies model files; NeMo/PyTorch
-perform inference. No hosted inference API, account, or Langfuse service is required.
+Compare OpenThai, Typhoon ASR, Qwen3-ASR-0.6B, and LFM3-Omni-2B, all paired with NVIDIA
+Nemotron-3-Diarization. Audio and transcripts stay on your machine. Hugging Face supplies
+model files. Inference runs through NeMo/PyTorch or your local Llama.app server.
 
 This is an offline evaluation tool and an application integration starting point. It is
 not an HTTP service. Accuracy, speaker attribution, and overlapping speech still need
@@ -69,6 +69,21 @@ interval boundaries rather than word/token emission times. See [Qwen setup and l
 uv run asr-bench run --manifest examples/local.jsonl --model qwen \
   --out results/qwen-01 --offline
 ```
+
+## LFM3-Omni-2B via Llama.app
+
+With LFM3-Omni-2B available in Llama.app on port 9931, run from the repository root:
+
+```bash
+uv run scripts/test_lfm3.py --manifest examples/local.jsonl \
+  --out results/lfm3-01 --offline
+```
+
+The script runs the same benchmark as `asr-bench run --model lfm3`. It detects speakers
+locally and sends each turn as WAV audio to Llama.app. `--offline` requires the pinned diarizer
+to be cached. The checkpoint for LFM3 is managed by Llama.app. Thai ASR is experimental
+because Thai is absent from the model card's speech language list. See
+[setup and limitations](docs/lfm3.md).
 
 ## Accuracy requires references
 

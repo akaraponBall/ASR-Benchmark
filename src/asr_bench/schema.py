@@ -35,7 +35,18 @@ class QwenASRConfig(StrictModel):
     max_segment_s: float = Field(default=25, gt=0, le=30)
 
 
-ASRSettings = Annotated[ASRConfig | QwenASRConfig, Field(discriminator="kind")]
+class LlamaASRConfig(StrictModel):
+    kind: Literal["llama_audio"]
+    repo: str = Field(min_length=1)
+    model_id: str | None = Field(default=None, min_length=1)
+    port: int = Field(default=9931, ge=1, le=65535)
+    language: str = Field(default="Thai", min_length=1)
+    max_segment_s: float = Field(default=25, ge=0.001, le=30)
+    max_tokens: int = Field(default=2048, ge=1)
+    timeout_s: float = Field(default=120, gt=0)
+
+
+ASRSettings = Annotated[ASRConfig | QwenASRConfig | LlamaASRConfig, Field(discriminator="kind")]
 
 
 class DiarizationConfig(Checkpoint):
